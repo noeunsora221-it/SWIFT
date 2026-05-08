@@ -1,35 +1,27 @@
 import SwiftUI
-internal import Combine
-import Foundation
+import SwiftData
 
-// create a Todo connect
-struct Todo : Decodable, Identifiable{
-    let id : Int
-    let title : String
-}
-
-func fetchData()async throws -> [Todo]{
-    // create networking connection with decode
-    let url = URL(string: "https://jsonplaceholder.typicode.com/todos?_limit=2")!
-    let (data, respone) = try await URLSession.shared.data(from: url) // respone data
-    
-    // return result
-    return try JSONDecoder().decode([Todo].self, from: data)
-}
 struct ContentView : View {
-    @State private var todos : [Todo] = []
+    @State private var flipped = false
     var body: some View {
-        List(todos){
-            t in Text(t.title)
-        }
-        .task {
+        // image with animation Rotations3DEffect
+        NavigationStack{
+            AsyncImage(url: URL(string: "https://i.pinimg.com/1200x/ae/3a/55/ae3a55d15d6fbf02b713e80057e8e11b.jpg"))
+                .scaledToFit()
+                .frame(width: 500,height: 1100)
+                .clipped()
+                .cornerRadius(30)
+                .rotation3DEffect(.degrees(flipped ? 150: 0), axis: (x : 0, y : 1, z : 0))
             
-            do{
-                todos = try await fetchData()
-            }catch{
-                print(error)
-            }
+                .animation(.easeInOut, value: flipped)
+                
+                .onTapGesture {
+                    flipped.toggle()
+                }
+            
+                
         }
+        
     }
 }
 
