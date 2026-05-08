@@ -1,35 +1,38 @@
 import SwiftUI
+internal import Combine
+import Foundation
 
-struct ContentView :View {
-    @State private var isAlert : Bool = false
-    @State private var result : Int = 0;
-    @State private var isAlert1 : Bool = false
-    @State private var result_1 :Int = 0;
+// create a Todo connect
+struct Todo : Decodable, Identifiable{
+    let id : Int
+    let title : String
+}
+
+func fetchData()async throws -> [Todo]{
+    // create networking connection with decode
+    let url = URL(string: "https://jsonplaceholder.typicode.com/todos?_limit=2")!
+    let (data, respone) = try await URLSession.shared.data(from: url) // respone data
+    
+    // return result
+    return try JSONDecoder().decode([Todo].self, from: data)
+}
+struct ContentView : View {
+    @State private var todos : [Todo] = []
     var body: some View {
-        VStack{
-            // Review -> about Color | Frame | background set values and Valable Modifying
-            //Review -> Message alert the showing
-            Text("Showing the result : \(result)")
-            Button("Caculate Plus"){
-                result += 10
-            }
-            Button("Showing ALert"){
-                isAlert = true
-            }
-            Text("Showing the result :\(result)")
-            Button("Caculate Minus"){
-                Button("Showing Now"){
-                    result_1 -= 10
-                }
-            }.alert("Warning", isPresented: $isAlert){
-                Button("OK ! Pls check it!"){}
-            }message: {
-                Text("Showing the result \(result)")
+        List(todos){
+            t in Text(t.title)
+        }
+        .task {
+            
+            do{
+                todos = try await fetchData()
+            }catch{
+                print(error)
             }
         }
     }
-    
 }
+
 
 #Preview {
     ContentView()
